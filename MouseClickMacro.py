@@ -1,12 +1,18 @@
 import pyautogui as autoGui
-import mss,time
+import mss
+import time
 import cv2
 import numpy as np
 
-autoGui.PAUSE= 0.045
 
-#플레이어 마다 아이콘의 밝기와 위치가 조금씩 다르다. 그러므로 그 부분을 유의.
-#나는 LD플레이어를씀.
+fastPause = 0.001
+normalPause = 0.045
+
+autoGui.PAUSE = normalPause
+
+
+# 플레이어 마다 아이콘의 밝기와 위치가 조금씩 다르다. 그러므로 그 부분을 유의.
+# 나는 LD플레이어를씀.
 # (뇌피셜) 빨리 처리하다보니 전꺼의 잔상에 색이 입력되어 콤보가 깨지는것같음.
 
 icon_length = 105
@@ -22,26 +28,53 @@ right_button = [355, button_height]
 
 state_sword = "SWORD"
 state_jewel = "JEWEL"
-fail_count =0;
-fever_count =0;
-count =0;
-def doAction():
-    with mss.mss() as sct:
-        global  fail_count,fever_count
-        left_img = np.array(sct.grab(left_icon_pos))[:, :, :3]
-        right_img = np.array(sct.grab(right_icon_pos))[:, :, :3]
+fail_count = 0
 
+
+def setAutoGui(num):
+    global autoGui
+    autoGui.PAUSE = num
+
+
+def doActionLeft():
+    is_action = True
+    with mss.mss() as sct:
+        left_img = np.array(sct.grab(left_icon_pos))[:, :, :3]
         left_icon = compute_icon_typeByRGB(left_img)
-        right_icon = compute_icon_typeByRGB(right_img)
 
         if left_icon == state_sword:
             click(left_button)
-        elif right_icon == state_sword:
-            click(right_button)
-        elif left_icon == state_jewel and right_icon == state_jewel:
+        elif left_icon == state_jewel:
             click(left_button)
         else:
-            fail_count+=1;
+            is_action = False
+        return is_action
+
+
+def doActionRight():
+    is_action = True
+    with mss.mss() as sct:
+        right_img = np.array(sct.grab(right_icon_pos))[:, :, :3]
+        right_icon = compute_icon_typeByRGB(right_img)
+
+        if right_icon == state_sword:
+            click(right_button)
+        else:
+            is_action = False
+        return is_action
+
+
+def doAction():
+    with mss.mss() as sct:
+        global fail_count
+
+        if doActionLeft():
+            {}
+        elif doActionRight():
+            {}
+        else:
+            fail_count += 1
+
 
 def compute_icon_typeByRGB(image):
     global count
@@ -53,24 +86,20 @@ def compute_icon_typeByRGB(image):
     elif rgb[0] > 130 and rgb[1] > 130 and rgb[2] > 90:
         result = 'JEWEL'
 
-
     return result
 
-def click (axis):
+
+def click(axis):
     global fail_count
-    autoGui.moveTo(x=axis[0],y=axis[1],duration=0.0)
+    autoGui.moveTo(x=axis[0], y=axis[1], duration=0.0)
     autoGui.mouseDown()
     autoGui.mouseUp()
-    fail_count=0
+    fail_count = 0
+
 
 while True:
-    if fail_count> 5 :
-       print("끝")
-       break
+    if fail_count > 5:
+        print("끝")
+        break
     else:
         doAction()
-
-
-
-
-
