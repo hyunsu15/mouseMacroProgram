@@ -1,8 +1,8 @@
 import pyautogui as autoGui
-import mss
-import time
-import cv2
+import mss as mss
+import cv2 as cv2
 import numpy as np
+from tkinter import *
 
 
 fastPause = 0.001
@@ -29,6 +29,7 @@ right_button = [355, button_height]
 state_sword = "SWORD"
 state_jewel = "JEWEL"
 fail_count = 0
+play_count = 0
 
 
 def setAutoGui(num):
@@ -97,9 +98,28 @@ def click(axis):
     fail_count = 0
 
 
-while True:
-    if fail_count > 5:
-        print("끝")
-        break
-    else:
-        doAction()
+def onClick():
+    global fail_count
+    fail_count = 0
+    while True:
+        if fail_count > 5:
+            print("끝")
+            break
+        else:
+            doAction()
+
+
+root = Tk()
+root.title("")
+root.geometry('200x100')
+
+
+title_name = "집행검마우스 매크로"
+button_name = "start"
+
+title = Label(root, text=title_name)
+title.pack()
+button = Button(root, text=button_name, command=onClick)
+button.pack()
+
+root.mainloop()
